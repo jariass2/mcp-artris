@@ -173,7 +173,7 @@ class GESADOptimizedProcessor:
     def filtrar_fichajes_por_periodo(self, fichajes: List[Dict[str, Any]], timestamp_actual: datetime) -> tuple:
         """Filtrar fichajes por el periodo actual basándose en la hora prevista de entrada
         
-        La ventana es simétrica: desde (actual - 20 min) hasta (actual + 20 min)
+        La ventana es simétrica: desde (actual - intervalo/2) hasta (actual + intervalo/2)
         Esto permite detectar ausencias que ya pasaron su hora prevista
         
         Returns:
@@ -186,8 +186,9 @@ class GESADOptimizedProcessor:
             timestamp_actual = config.TZ.localize(timestamp_actual)
         
         check_interval_seconds = config.get_check_interval_seconds()
-        hora_limite_superior = timestamp_actual + timedelta(seconds=check_interval_seconds)
-        hora_limite_inferior = timestamp_actual - timedelta(seconds=check_interval_seconds)
+        half_interval = check_interval_seconds / 2
+        hora_limite_superior = timestamp_actual + timedelta(seconds=half_interval)
+        hora_limite_inferior = timestamp_actual - timedelta(seconds=half_interval)
         
         for fichaje in fichajes:
             if not isinstance(fichaje, dict):
@@ -217,7 +218,7 @@ class GESADOptimizedProcessor:
                 if hora_prevista_dt.tzinfo is None:
                     hora_prevista_dt = config.TZ.localize(hora_prevista_dt)
                 
-                # Ventana simétrica: hora_prevista debe estar entre (actual - 20 min) y (actual + 20 min)
+                # Ventana simétrica: hora_prevista debe estar entre (actual - intervalo/2) y (actual + intervalo/2)
                 if hora_limite_inferior <= hora_prevista_dt <= hora_limite_superior:
                     fichajes_filtrados.append(fichaje)
                     
@@ -226,7 +227,7 @@ class GESADOptimizedProcessor:
                 continue
         
         minutos_ventana = check_interval_seconds / 60
-        logger.info(f"🕐 Fichajes filtrados por periodo: {len(fichajes_filtrados)}/{len(fichajes)} (ventana: {hora_limite_inferior.strftime('%H:%M')} - {hora_limite_superior.strftime('%H:%M')} | {minutos_ventana*2:.0f} min)")
+        logger.info(f"🕐 Fichajes filtrados por periodo: {len(fichajes_filtrados)}/{len(fichajes)} (ventana: {hora_limite_inferior.strftime('%H:%M')} - {hora_limite_superior.strftime('%H:%M')} | {minutos_ventana:.0f} min)")
         
         return fichajes_filtrados, hora_limite_superior, hora_limite_inferior
     
