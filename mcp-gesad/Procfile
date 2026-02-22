@@ -1,1 +1,1 @@
-worker: python start_monitoring.py --standalone
+web: python start_monitoring.py --standalone
