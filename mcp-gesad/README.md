@@ -288,70 +288,31 @@ Para soporte técnico:
 
 ---
 
-## ☁️ Despliegue en Producción
+## ☁️ Despliegue en Producción (EasyPanel)
 
-### Requisitos de Infraestructura
+El servicio se despliega como worker en un VPS con EasyPanel, directamente desde este repositorio GitHub mediante Nixpacks (sin Dockerfile).
 
-| Componente | Tecnología | Notas |
-|------------|------------|-------|
-| **Servidor** | VPS (Ubuntu 22.04) | Mínimo 2CPU, 4GB RAM |
-| **Panel** | EasyPanel | Gestión de contenedores |
-| **n8n** | Docker | Orquestación de webhooks |
-| **PostgreSQL** | Docker | Almacenamiento de datos |
-| **MCP GESAD** | Docker | Puerto 9999 |
+**Guía completa:** [docs/DEPLOY_EASYPANEL.md](docs/DEPLOY_EASYPANEL.md)
 
-### Puertos
+### Resumen rápido
 
-| Puerto | Servicio |
-|--------|----------|
-| 80/443 | EasyPanel + n8n |
-| 5678 | n8n (opcional) |
-| 5432 | PostgreSQL |
-| 9999 | MCP GESAD |
+1. En EasyPanel → crear servicio **App** dentro de un proyecto
+2. Source: **GitHub** → `jariass2/mcp-artris` · branch `master` · root `/mcp-gesad`
+3. Build: **Nixpacks** (auto-detectado via `Procfile`)
+4. Añadir variables de entorno desde `.env.example`
+5. Deploy
 
-### Chat NLP con OpenWebUI + OpenRouter (Opcional)
+> ⚠️ Valores con `#` en variables de entorno deben ir entre comillas dobles:
+> `GESAD_API_CODE="ARTRIS_4Jk#pL%1@"`
 
-Para consultas en lenguaje natural sobre los datos:
+### Infraestructura actual
 
-```
-OpenWebUI → OpenRouter (GLM-4.7/Kimi) → MCPO → MCP GESAD → PostgreSQL
-```
-
-Coste: ~5-15€/mes via OpenRouter
-
-Ver docs/PLAN_REPORTING_POSTGRESQL.md para más detalles.
-
-### Configuración Rápida OpenWebUI
-
-```bash
-# 1. Obtener API Key de OpenRouter: https://openrouter.ai
-
-# 2. Docker Compose:
-version: '3.8'
-services:
-  openwebui:
-    image: openwebui/open-webui:main
-    ports:
-      - "3000:8080"
-    environment:
-      - OPENAI_API_KEY=${OPENROUTER_API_KEY}
-      - OPENAI_API_BASE_URL=https://openrouter.ai/v1
-
-  mcpo:
-    image: openwebui/mcpo:latest
-    ports:
-      - "8000:8000"
-    command: --port 8000 python /path/to/server.py
-
-# 3. Acceder a http://localhost:3000
-```
-
-### Herramientas Disponibles en OpenWebUI
-
-- `get_estado_asistencia_actual()` - Estado actual del monitoreo
-- `get_alertas_activas()` - Alertas activas del sistema
-- `get_system_status()` - Estado completo del sistema
-- `force_verification()` - Forzar verificación manual
+| Componente | Detalle |
+|---|---|
+| VPS | Ubuntu, mínimo 1 vCPU / 1 GB RAM |
+| Panel | EasyPanel (gestión via GitHub) |
+| Build | Nixpacks (Python 3.12) |
+| Webhooks | n8n en `https://n8n.multiplai.org` |
 
 ## 📄 Licencia
 
