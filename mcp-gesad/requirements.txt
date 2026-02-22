@@ -1,0 +1,16 @@
+# MCP Server Dependencies
+mcp>=0.9.0
+httpx>=0.25.0
+python-dotenv>=1.0.0
+pydantic>=2.0.0
+asyncio-mqtt>=0.16.0
+aiofiles>=23.0.0
+nest-asyncio>=1.5.6
+pytz>=2023.3
+pytest>=7.0.0
+pytest-asyncio>=0.21.0
+
+# HTTP API Dependencies for n8n
+fastapi==0.104.1
+uvicorn==0.24.0
+python-multipart==0.0.6
