@@ -187,76 +187,90 @@ class GESADScheduler:
             logger.error(f"❌ Error en precarga de datos maestros: {e}")
     
     async def obtener_usuarios_completos(self):
-        """Obtener lista completa de usuarios con paginación"""
-        
-        all_usuarios = []
-        pagina = 1
-        tiene_mas = True
-        
-        while tiene_mas:
-            # Usar fecha actual para obtener todos los usuarios activos
-            fecha_actual = config.get_local_time().strftime('%d-%m-%Y')
-            url = f"{config.BASE_URL}/Usuarios/Expedientes/{config.SESSION_ID}"
-            fecha_inicio_anyo = f'01-01-{config.get_local_time().year}'
-            params = {
-                'fecha_Inicio': fecha_inicio_anyo,
-                'fecha_Fin': fecha_actual,
-                'numero_Pagina': pagina,
-                'registros_Pagina': 1000
-            }
+        """Obtener lista completa de usuarios con paginación y fallback de año"""
 
-            result = await gesad_client._make_request_with_retry("GET", url, params=params)
+        fecha_actual = config.get_local_time().strftime('%d-%m-%Y')
+        url = f"{config.BASE_URL}/Usuarios/Expedientes/{config.SESSION_ID}"
+        año_actual = config.get_local_time().year
 
-            if result and "error" not in result and isinstance(result, list):
-                all_usuarios.extend(result)
-                
-                # Si devuelve menos de 1000, probablemente es la última página
-                if len(result) < 1000:
-                    tiene_mas = False
+        for años_atras in range(6):
+            fecha_inicio = f'01-01-{año_actual - años_atras}'
+            all_usuarios = []
+            pagina = 1
+            tiene_mas = True
+
+            while tiene_mas:
+                params = {
+                    'fecha_Inicio': fecha_inicio,
+                    'fecha_Fin': fecha_actual,
+                    'numero_Pagina': pagina,
+                    'registros_Pagina': 1000
+                }
+                result = await gesad_client._make_request_with_retry("GET", url, params=params)
+
+                if result and "error" not in result and isinstance(result, list):
+                    all_usuarios.extend(result)
+                    if len(result) < 1000:
+                        tiene_mas = False
+                    else:
+                        pagina += 1
+                        await asyncio.sleep(0.5)
                 else:
-                    pagina += 1
-                    await asyncio.sleep(0.5)  # Pequeña pausa entre peticiones
-            else:
-                tiene_mas = False
-                logger.warning(f"Error obteniendo usuarios página {pagina}: {result}")
-        
-        return all_usuarios
+                    tiene_mas = False
+                    logger.warning(f"Error obteniendo usuarios página {pagina}: {result}")
+
+            if all_usuarios:
+                if años_atras > 0:
+                    logger.info(f"✅ Usuarios encontrados con fecha_Inicio={fecha_inicio} ({años_atras} año(s) atrás)")
+                return all_usuarios
+
+            logger.info(f"Sin usuarios desde {fecha_inicio}, retrocediendo un año...")
+
+        logger.error("No se encontraron usuarios en los últimos 6 años")
+        return []
     
     async def obtener_trabajadores_completos(self):
-        """Obtener lista completa de trabajadores con paginación"""
-        
-        all_trabajadores = []
-        pagina = 1
-        tiene_mas = True
-        
-        while tiene_mas:
-            # Usar fecha actual para obtener todos los trabajadores activos
-            fecha_actual = config.get_local_time().strftime('%d-%m-%Y')
-            url = f"{config.BASE_URL}/Trabajadores/Expedientes/{config.SESSION_ID}"
-            fecha_inicio_anyo = f'01-01-{config.get_local_time().year}'
-            params = {
-                'fecha_Inicio': fecha_inicio_anyo,
-                'fecha_Fin': fecha_actual,
-                'numero_Pagina': pagina,
-                'registros_Pagina': 1000
-            }
+        """Obtener lista completa de trabajadores con paginación y fallback de año"""
 
-            result = await gesad_client._make_request_with_retry("GET", url, params=params)
+        fecha_actual = config.get_local_time().strftime('%d-%m-%Y')
+        url = f"{config.BASE_URL}/Trabajadores/Expedientes/{config.SESSION_ID}"
+        año_actual = config.get_local_time().year
 
-            if result and "error" not in result and isinstance(result, list):
-                all_trabajadores.extend(result)
-                
-                # Si devuelve menos de 1000, probablemente es la última página
-                if len(result) < 1000:
-                    tiene_mas = False
+        for años_atras in range(6):
+            fecha_inicio = f'01-01-{año_actual - años_atras}'
+            all_trabajadores = []
+            pagina = 1
+            tiene_mas = True
+
+            while tiene_mas:
+                params = {
+                    'fecha_Inicio': fecha_inicio,
+                    'fecha_Fin': fecha_actual,
+                    'numero_Pagina': pagina,
+                    'registros_Pagina': 1000
+                }
+                result = await gesad_client._make_request_with_retry("GET", url, params=params)
+
+                if result and "error" not in result and isinstance(result, list):
+                    all_trabajadores.extend(result)
+                    if len(result) < 1000:
+                        tiene_mas = False
+                    else:
+                        pagina += 1
+                        await asyncio.sleep(0.5)
                 else:
-                    pagina += 1
-                    await asyncio.sleep(0.5)  # Pequeña pausa entre peticiones
-            else:
-                tiene_mas = False
-                logger.warning(f"Error obteniendo trabajadores página {pagina}: {result}")
-        
-        return all_trabajadores
+                    tiene_mas = False
+                    logger.warning(f"Error obteniendo trabajadores página {pagina}: {result}")
+
+            if all_trabajadores:
+                if años_atras > 0:
+                    logger.info(f"✅ Trabajadores encontrados con fecha_Inicio={fecha_inicio} ({años_atras} año(s) atrás)")
+                return all_trabajadores
+
+            logger.info(f"Sin trabajadores desde {fecha_inicio}, retrocediendo un año...")
+
+        logger.error("No se encontraron trabajadores en los últimos 6 años")
+        return []
     
     def set_monitoring_callback(self, callback: Callable):
         """Establecer callback para ejecutar en cada verificación"""
