@@ -169,7 +169,7 @@ class GESADClient:
         params = {
             'numero_Pagina': 1,
             'registros_Pagina': 1000,
-            'fecha_Inicio': '01-01-2020',
+            'fecha_Inicio': f'01-01-{config.get_local_time().year}',
             'fecha_Fin': fecha_fin
         }
         
@@ -193,7 +193,7 @@ class GESADClient:
         
         url = f"{self.base_url}/Usuarios/Expedientes/{self.session_id}"
         params = {
-            'fecha_Inicio': '01-01-2024',
+            'fecha_Inicio': f'01-01-{config.get_local_time().year}',
             'fecha_Fin': fecha_fin,
             'numero_Pagina': pagina,
             'registros_Pagina': registros
@@ -237,7 +237,7 @@ class GESADClient:
             
         url = f"{self.base_url}/Usuarios/Expedientes/{self.session_id}"
         params = {
-            'fecha_Inicio': '01-01-2024',
+            'fecha_Inicio': f'01-01-{config.get_local_time().year}',
             'fecha_Fin': fecha_fin,
             'numero_Pagina': 1,
             'registros_Pagina': 1000

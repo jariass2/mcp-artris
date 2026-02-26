@@ -197,15 +197,16 @@ class GESADScheduler:
             # Usar fecha actual para obtener todos los usuarios activos
             fecha_actual = config.get_local_time().strftime('%d-%m-%Y')
             url = f"{config.BASE_URL}/Usuarios/Expedientes/{config.SESSION_ID}"
+            fecha_inicio_anyo = f'01-01-{config.get_local_time().year}'
             params = {
-                'fecha_Inicio': '01-01-2024',
+                'fecha_Inicio': fecha_inicio_anyo,
                 'fecha_Fin': fecha_actual,
                 'numero_Pagina': pagina,
                 'registros_Pagina': 1000
             }
-            
+
             result = await gesad_client._make_request_with_retry("GET", url, params=params)
-            
+
             if result and "error" not in result and isinstance(result, list):
                 all_usuarios.extend(result)
                 
@@ -232,15 +233,16 @@ class GESADScheduler:
             # Usar fecha actual para obtener todos los trabajadores activos
             fecha_actual = config.get_local_time().strftime('%d-%m-%Y')
             url = f"{config.BASE_URL}/Trabajadores/Expedientes/{config.SESSION_ID}"
+            fecha_inicio_anyo = f'01-01-{config.get_local_time().year}'
             params = {
-                'fecha_Inicio': '01-01-2024',
+                'fecha_Inicio': fecha_inicio_anyo,
                 'fecha_Fin': fecha_actual,
                 'numero_Pagina': pagina,
                 'registros_Pagina': 1000
             }
-            
+
             result = await gesad_client._make_request_with_retry("GET", url, params=params)
-            
+
             if result and "error" not in result and isinstance(result, list):
                 all_trabajadores.extend(result)
                 
